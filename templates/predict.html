@@ -2,67 +2,250 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Predict Churn</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churn Prediction</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         body {
-            background: linear-gradient(to right, #36d1dc, #5b86e5);
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
             color: white;
             font-family: 'Arial', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            overflow-x: hidden;
         }
         .container {
-            max-width: 400px;
-            padding: 30px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            margin-top: 80px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
+        }
+        h1, h2 {
+            font-weight: bold;
             text-align: center;
         }
         h1 {
+            font-size: 2.5rem;
+            animation: fadeInDown 1s;
+        }
+        h2 {
             font-size: 1.8rem;
+            margin-top: 40px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+            padding-bottom: 10px;
+        }
+        .form-group {
             margin-bottom: 20px;
         }
-        .form-control, .form-select {
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #ffffff;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            border-radius: 30px;
+            background: #007bff;
+            border: none;
+            font-size: 1.2rem;
+            transition: all 0.3s ease-in-out;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            animation: none;
+        }
+        .recommendation-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .recommendation-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .btn-buy {
+            background: #28a745;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-buy:hover {
+            background: #218838;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .instructions {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .instructions h3 {
+            color: #ffffff;
+            font-size: 1.5rem;
             margin-bottom: 15px;
         }
-        .btn-custom {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 1rem;
-            margin-top: 10px;
+        .instructions ul {
+            padding-left: 20px;
         }
-        .footer {
-            margin-top: 15px;
-            font-size: 0.8rem;
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        .floating-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .floating-icons span {
+            position: absolute;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 10s infinite ease-in-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(-50px); opacity: 0.6; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
+    <div class="floating-icons" id="floating-icons"></div>
     <div class="container animate__animated animate__fadeInDown">
-        <h1>Predict Churn</h1>
-        <form method="post">
+        <h1>Churn Prediction</h1>
+
+        <!-- Instructions Section -->
+        <div class="instructions animate__animated animate__fadeIn" style="animation-delay: 0.1s;">
+            <h3>About This Project</h3>
+            <p>Welcome to the Churn Prediction System! This project is designed to help you understand your customer behavior and make informed decisions. Here's what you can do:</p>
+            <ul>
+                <li><strong>Register and Log In:</strong> Create an account or log in to access personalized features.</li>
+                <li><strong>Churn Prediction:</strong> Enter your details to predict the likelihood of churn based on your tenure, charges, and contract type.</li>
+                <li><strong>Personalized Recommendations:</strong> Receive product recommendations tailored to your churn prediction history, purchase history, and interactions.</li>
+                <li><strong>Track History:</strong> The system tracks your purchase history and interactions to provide better recommendations over time.</li>
+            </ul>
+        </div>
+
+        <form method="post" id="predictForm">
             {% csrf_token %}
-            <input type="number" name="tenure" class="form-control" placeholder="Tenure (months)" value="{{ customer.tenure }}" required>
-            <input type="number" step="0.01" name="monthly_charges" class="form-control" placeholder="Monthly Charges" value="{{ customer.monthly_charges }}" required>
-            <input type="number" step="0.01" name="total_charges" class="form-control" placeholder="Total Charges" value="{{ customer.total_charges }}" required>
-            <select name="contract_type" class="form-select">
-                <option value="Month-to-month" {% if customer.contract_type == 'Month-to-month' %}selected{% endif %}>Month-to-month</option>
-                <option value="One year" {% if customer.contract_type == 'One year' %}selected{% endif %}>One year</option>
-            </select>
-            <button type="submit" class="btn btn-primary btn-custom">Predict</button>
+            <div class="form-group animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+                <label for="tenure">Tenure (months)</label>
+                <input type="number" name="tenure" id="tenure" class="form-control" value="{{ customer.tenure }}" required>
+            </div>
+            <div class="form-group animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                <label for="monthly_charges">Monthly Charges ($)</label>
+                <input type="number" step="0.01" name="monthly_charges" id="monthly_charges" class="form-control" value="{{ customer.monthly_charges }}" required>
+            </div>
+            <div class="form-group animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+                <label for="total_charges">Total Charges ($)</label>
+                <input type="number" step="0.01" name="total_charges" id="total_charges" class="form-control" value="{{ customer.total_charges }}" required>
+            </div>
+            <div class="form-group animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
+                <label for="contract_type">Contract Type</label>
+                <select name="contract_type" id="contract_type" class="form-control" required>
+                    <option value="Month-to-month" {% if customer.contract_type == 'Month-to-month' %}selected{% endif %}>Month-to-month</option>
+                    <option value="One year" {% if customer.contract_type == 'One year' %}selected{% endif %}>One year</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary animate__animated">Predict</button>
         </form>
-        <a href="{% url 'index' %}" class="btn btn-light btn-custom">Back</a>
-        <div class="footer">&copy; 2025 Churn Prediction</div>
+
+        <h2 class="animate__animated animate__fadeIn" style="animation-delay: 0.5s;">Recommended Products</h2>
+        {% if recommendations %}
+            <div class="row">
+                {% for rec in recommendations %}
+                    <div class="col-md-4">
+                        <div class="recommendation-card animate__animated animate__zoomIn" style="animation-delay: {{ rec.delay }}s;">
+                            <img src="{{ rec.image }}" alt="{{ rec.name }}">
+                            <h5>{{ rec.name }}</h5>
+                            <p>{{ rec.description }}</p>
+                            <form method="post" action="{% url 'purchase_product' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_name" value="{{ rec.name }}">
+                                <button type="submit" class="btn btn-buy">Buy Now</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No recommendations available.</p>
+        {% endif %}
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const floatingIconsContainer = document.getElementById("floating-icons");
+            for (let i = 0; i < 15; i++) {
+                let span = document.createElement("span");
+                span.style.top = Math.random() * 100 + "vh";
+                span.style.left = Math.random() * 100 + "vw";
+                span.style.animationDelay = Math.random() * 5 + "s";
+                floatingIconsContainer.appendChild(span);
+            }
+
+            const tenureInput = document.getElementById('tenure');
+            const monthlyChargesInput = document.getElementById('monthly_charges');
+            const totalChargesInput = document.getElementById('total_charges');
+
+            function updateTotalCharges() {
+                const tenure = parseInt(tenureInput.value) || 0;
+                const monthlyCharges = parseFloat(monthlyChargesInput.value) || 0;
+                totalChargesInput.value = (tenure * monthlyCharges).toFixed(2);
+            }
+
+            tenureInput.addEventListener('input', updateTotalCharges);
+            monthlyChargesInput.addEventListener('input', updateTotalCharges);
+
+            const form = document.getElementById('predictForm');
+            form.addEventListener('submit', function(e) {
+                const button = form.querySelector('.btn-primary');
+                button.classList.remove('animate__pulse');
+                button.textContent = 'Predicting...';
+                button.disabled = true;
+            });
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

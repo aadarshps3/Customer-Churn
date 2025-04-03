@@ -2,60 +2,146 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Register - Churn Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         body {
-            background: linear-gradient(to right, #36d1dc, #5b86e5);
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
             color: white;
             font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
             display: flex;
-            align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
+            align-items: center;
+            min-height: 100vh;
         }
-        .container {
-            max-width: 350px;
+        .register-container {
+            max-width: 400px;
             padding: 30px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
-            text-align: center;
         }
-        h1 {
-            font-size: 1.8rem;
+        h2 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+            font-size: 2rem;
+            animation: fadeInDown 1s;
+        }
+        .form-group {
             margin-bottom: 20px;
         }
-        .btn-custom {
-            width: 100%;
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
             padding: 10px;
-            border-radius: 5px;
-            font-size: 1rem;
-            margin-top: 10px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-        .footer {
-            margin-top: 15px;
-            font-size: 0.8rem;
+        .form-control:focus {
+            border-color: #ffffff;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            border-radius: 30px;
+            background: #007bff;
+            border: none;
+            font-size: 1.2rem;
+            transition: all 0.3s ease-in-out;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            animation: none;
+        }
+        .error-message {
+            color: #ff0000;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .floating-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .floating-icons span {
+            position: absolute;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 10s infinite ease-in-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(-50px); opacity: 0.6; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
-    <div class="container animate__animated animate__fadeInDown">
-        <h1>Register</h1>
+    <div class="floating-icons" id="floating-icons"></div>
+    <div class="register-container animate__animated animate__fadeInDown">
+        <h2>Register</h2>
+        {% if form.errors %}
+            <p class="error-message">Please correct the errors below.</p>
+        {% endif %}
         <form method="post">
             {% csrf_token %}
-            <div class="mb-3">
-                {{ form.as_p }}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary btn-custom">Register</button>
+            <div class="form-group">
+                <label for="password1">Password</label>
+                <input type="password" name="password1" id="password1" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password2">Confirm Password</label>
+                <input type="password" name="password2" id="password2" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
         </form>
-        <a href="{% url 'index' %}" class="btn btn-light btn-custom">Back</a>
-        <div class="footer">&copy; 2025 Churn Prediction</div>
+        <p class="text-center mt-3">Already have an account? <a href="{% url 'login' %}" style="color: #ffffff;">Login</a></p>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const floatingIconsContainer = document.getElementById("floating-icons");
+            for (let i = 0; i < 15; i++) {
+                let span = document.createElement("span");
+                span.style.top = Math.random() * 100 + "vh";
+                span.style.left = Math.random() * 100 + "vw";
+                span.style.animationDelay = Math.random() * 5 + "s";
+                floatingIconsContainer.appendChild(span);
+            }
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
